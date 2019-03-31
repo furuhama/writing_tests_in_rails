@@ -3,13 +3,16 @@
 require 'spec_helper'
 
 RSpec.describe Book, type: :model do
-  describe 'FactoryBot' do
-    let(:book) { create(:book) }
+  describe '#info' do
+    context 'page が nil の場合' do
+      let(:author) { Author.create!(name: 'Haruki Murakami') }
+      let(:book) { create(:book, author: author, title: '', page: nil) }
 
-    it { expect(book.title).to eq 'Hitsuji Wo Meguru Bouken' }
-  end
+      it { expect(book.info).to eq '' }
+    end
 
-  describe 'DatabaseRewinder' do
-    it { expect(Book.count).to eq 0 }
+    context 'page が 150 の場合' do
+      # ここを埋めてみよう
+    end
   end
 end
