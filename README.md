@@ -385,11 +385,26 @@ end
 
 こんな定義になっていると思います。
 
-この `info` というメソッドのテストを書いてみましょう。
+この `info` というメソッドのテストを書いていきましょう。
+
+#### Book モデルのテスト
 
 テストの場所は `spec/models/books_spec.rb` です。これを開いてみましょう。
 
 今回も僕が途中まで書いておきました。
+
+`info` メソッドをみると、まず `title` があるかどうかで条件分岐がありますね。
+
+`return unless title`
+
+これによって `title` がある場合とない場合を確かめればいいとわかりました。
+
+さらに読み進めていくと `title` がある場合に、 `page` がある場合とない場合で条件分岐があります。
+
+これによってさらに `page` のある場合ない場合を調べればいいとわかりました。
+
+以上を踏まえるとテストは以下のような構造になりそうです。
+
 
 ```ruby
 # frozen_string_literal: true
@@ -398,27 +413,62 @@ require 'spec_helper'
 
 RSpec.describe Book, type: :model do
   describe '#info' do
-    context 'page が nil の場合' do
-      let(:author) { Author.create!(name: 'Haruki Murakami') }
-      let(:book) { Book.create!(:book, author: author, title: '', page: nil) }
+    context 'title がある場合' do
+      context 'page が nil の場合' do
+        # 何か
+      end
 
-      it { expect(book.info).to eq '' }
-    end
-
-    context 'page が 150 の場合' do
-      # ここを埋めてみよう
+      context 'page が 150 の場合' do
+        # 何か
+      end
     end
 
     context 'title が nil の場合' do
-      # ここを埋めてみよう
+      # 何か
     end
   end
 end
 ```
 
-`context` に書かれている条件通りの状態を作った上で、正しい値が何かを考えてテストしてみましょう。
+そこで一つ目のケースのテストを途中まで書いてみます。
 
-余力があれば `spec/models/authors_spec.rb` に `Author` モデルに定義されている `greet` メソッドにもテストを書いてみましょう。
+`Book` モデルには `Author` モデルが必要なのでまず `Author` モデルを作ります。
+
+その上で `Book` モデルを作ります。この際 `title` には何か値をいれ `pages` は `nil` にしておきます。
+
+すると以下のようになります。(開いてもらったファイルでもこんな風になっていると思います)
+
+```ruby
+      context 'page が nil の場合' do
+        let(:author) { Author.create!(name: 'Haruki Murakami') }
+        let(:book) { Book.create!(author: author, title: 'Hitsuji Wo Meguru Bouken', pages: nil) }
+
+        it { expect(book.info).to eq '' }
+      end
+```
+
+はてさて、このテストはは本当に正しいのでしょうか、実行してみましょう。
+
+```
+bundle exec rspec spec/models/books_spec.rb
+```
+
+とすると
+
+```
+.
+
+Finished in 0.43437 seconds (files took 4.46 seconds to load)
+1 example, 0 failures
+```
+
+となり問題なさそうです。
+
+それでは残り 2 つの `context` について、書かれている条件通りの状態を作った上で、正しい値が何かを考えてテストしてみましょう。
+
+#### 余力があれば...
+
+`spec/models/authors_spec.rb` に `Author` モデルに定義されている `greet` メソッドにもテストを書いてみましょう。
 
 ### リクエストのテストを書いてみよう
 
