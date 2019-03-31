@@ -6,10 +6,10 @@ class Book < ApplicationRecord
   def info
     return unless title
 
-    if page
-      "#{title}: #{page} pages by #{author.name}"
+    if pages
+      "#{title}: #{pages} pages by #{author.name}"
     else
-      "#{title} by #{author.name}"
+      "#{title}: by #{author.name}"
     end
   end
 end
