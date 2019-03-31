@@ -7,7 +7,6 @@ require_relative '../config/environment'
 require 'rspec/rails'
 
 RSpec.configure do |config|
-  config.order = :random
   config.render_views
 
   config.before(:suite) do
