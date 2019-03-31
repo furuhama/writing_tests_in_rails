@@ -17,9 +17,9 @@ end
 
 group :test do
   gem 'rspec-rails'
+  gem 'factory_bot_rails'
+  gem 'database_rewinder' # テストデータ削除
   gem 'capybara', '>= 2.15'
   gem 'selenium-webdriver'
   gem 'chromedriver-helper'
 end
-
-gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
