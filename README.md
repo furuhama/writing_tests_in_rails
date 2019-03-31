@@ -361,7 +361,7 @@ Finished in 0.00671 seconds (files took 0.1356 seconds to load)
 
 それではここから Rails アプリケーションっぽいテストを書いてみましょう。
 
-今回の Rails アプリケーションでは `app/models` 配下に `Hoge` というモデルがありますね。
+今回の Rails アプリケーションでは `app/models` 配下に `Book` というモデルがありますね。
 
 これを開いてみましょう。
 
