@@ -19,9 +19,11 @@
 
 そんなことが起きてしまうと大変だし、何よりアプリケーションを書くのが楽しくなくなってしまうかもしれません。
 
-そこで現代的なアプリケーション開発ではテストというものを大事にしていて、アプリケーションが正しく動くかどうかを機械的に・人力でチェックする、という方法を採用することが多いです。
+そこで現代的なアプリケーション開発ではテストというものを大事にしていて、アプリケーションが正しく動くかどうかを機械的に、もしくは人力でチェックする、という方法を採用することが多いです。
 
-今回は Rails アプリケーションにおける基本的なテストの書き方を学んで行きましょう！
+とはいえ人力で確かめるのはすんごく大変です、なるべくならコードを書くだけでテストまで終わらせてしまいたいですよね。
+
+というわけで今回は Rails アプリケーションにおける(人力ではない)テストの基本的な書き方を学んで行きましょう！
 
 ### テストって何？
 
@@ -97,8 +99,272 @@ bundle install --path vendor/bundle
 
 #### 簡単なメソッドのテストを書いてみる
 
+まずは簡単なメソッドに対してテストを書いてみましょう！
+
+このリポジトリの `spec/tutorials/simple_spec.rb` というファイルを開いてみてください。
+
+このファイルは前半と後半に分けて考えることができます。
+
+前半は
+
+```ruby
+module SimpleMethods
+  def add_10(number)
+    number + 10
+  end
+end
+```
+
+後半は
+
+```ruby
+RSpec.describe 'Simple tests not related to Rails' do
+  include SimpleMethods
+
+  describe '#add_10' do
+    subject { add_10(number) }
+
+    context 'number が正の数の時' do
+      let(:number) { 10 }
+
+      it { is_expected.to eq 20 }
+    end
+
+    context 'number が 0 の時' do
+      let(:number) { 59 }
+
+      it { is_expected.to eq 10 }
+    end
+
+    context 'number が負の数の時' do
+      let(:number) { -100 }
+
+      it { is_expected.to eq 15 }
+    end
+  end
+end
+```
+
+です。
+
+このファイルでは、前半が定義しているメソッド、後半がそれに対するテスト、という構成になっています。
+
+後半については後から説明します。前半のメソッドの定義は正しいものと考えて、まずは後半のテストを実行してみましょう。
+
+ターミナルで以下のコマンドを打ってみてください。
+
+```
+bundle exec rspec spec/tutorials/simple_spec.rb
+```
+
+するとテスト結果が以下のような形で表示されると思います。
+
+```
+.FF
+
+Failures:
+
+  1) Simple tests not related to Rails #add_10 number が 0 の時 should eq 10
+     Failure/Error: it { is_expected.to eq 10 }
+
+       expected: 10
+            got: 69
+
+       (compared using ==)
+     # ./spec/tutorials/simple_spec.rb:24:in `block (4 levels) in <top (required)>'
+
+  2) Simple tests not related to Rails #add_10 number が負の数の時 should eq 15
+     Failure/Error: it { is_expected.to eq 15 }
+
+       expected: 15
+            got: -90
+
+       (compared using ==)
+     # ./spec/tutorials/simple_spec.rb:30:in `block (4 levels) in <top (required)>'
+
+Finished in 0.15898 seconds (files took 0.17623 seconds to load)
+3 examples, 2 failures
+
+Failed examples:
+
+rspec ./spec/tutorials/simple_spec.rb:24 # Simple tests not related to Rails #add_10 number が 0 の時 should eq 10
+rspec ./spec/tutorials/simple_spec.rb:30 # Simple tests not related to Rails #add_10 number が負の数の時 should eq 15
+```
+
+この `Failures` というのは失敗しているテストのことになります。
+
+いきなりではありますが失敗しているということはこのテストにはよくないところがありそうです。
+
+一つ一つ直していってみましょう。
+
+#### 一つ目のテストを直す前に...
+
+先ほどの結果をよくみてみると、 `Failures:` となっている部分の下に `1)` と `2)` とありますね。
+
+また、最後の方には `3 examples, 2 failures` とあります。
+
+これは 3 つあるテストのうちの 2 つが失敗している、ということを示しています。
+
+一度に 2 つをみると大変ですから、まず 1 つ目をみてみましょう。
+
+```
+  1) Simple tests not related to Rails #add_10 number が 0 の時 should eq 10
+     Failure/Error: it { is_expected.to eq 10 }
+
+       expected: 10
+            got: 69
+
+       (compared using ==)
+     # ./spec/tutorials/simple_spec.rb:24:in `block (4 levels) in <top (required)>'
+```
+
+とあって、 `#add_10 number が 0 の時 should eq 10` と書いてありますね。
+
+つまり `number` に `0` を与えたケースにおいて、テストに書いてある結果と、実際にコードを実行した場合の結果が異なってしまっているようです。
+
+該当するテストは `simple_spec.rb` ファイルの 19~23 行目になります。
+
+ここをみてみると
+
+```ruby
+    context 'number が 0 の時' do
+      let(:number) { 59 }
+
+      it { expect(add_10(number)).to eq -10 }
+    end
+```
+
+とありますね。
+
+まずみるべきは最後の `it { ~~~ }` という部分です。
+
+最初に `expect(add_10(number))` という部分がありますね。
+
+これは今回テストしたい対象を書いている部分になります。
+
+今回テストしたかったのは `add_10` というメソッドですね。これに `number` という変数を与えた時に出てくる結果をテストする、ということになります。
+
+次に `eq` という単語が見えてくると思います。これは `equal` つまり数式でいうところの `=` に近い意味の単語です。
+
+`add_10(number) の結果` が `何か` と <b>同じであること</b> をチェックする、ということになります。
+
+最後に何と同じであることをチェックするか、ですがこれはもう簡単かもしれませんね。 `-10` がその値になります。
+
+ここまでをまとめると
+
+`it { expect(add_10(number)).to eq -10 }`
+
+というのは
+
+`add_10(number) の結果` が `-10` と `同じ(eq)であること` をチェックしているテスト、という意味になります。
+
+ここで気になってくるのは `number` がいくつなのか、ということです。
+
+そこで `it { ~~~ }` の一つ上の `let(:number) { 59 }` という行を見てみましょう。
+
+これの意味はシンプルです。 `number` という変数に `59` を `割り当てる` ということを示しています。
+
+つまりこのテストにおいては `number = 59` という数式が成り立ちます。
+
+===
+
+さてここまでを踏まえてもう一度今回のテストを日本語っぽく考えてみると
+
+`number が 59 の時` に `add_10(number) の結果` が `-10` と `同じ(eq)であること` をチェックしているテスト、という意味になります。
+
+ここまでわかりましたか？
+
+#### 一つ目のテストを直す
+
+`number が 59 の時` に `add_10(number) の結果` が `-10` と `同じ(eq)であること` をチェックしているテスト
+
+というのは足し算をすると間違っていることが明らかですが、これをちゃんとコード的にも修正してあげましょう。
+
+今回は `let ~~~` の部分や `it { ~~~ }` の前半部分は直さずに、最後の `-10` を直す方針でいきましょう。
+
+```ruby
+    context 'number が 0 の時' do
+      let(:number) { 59 }
+
+      it { expect(add_10(number)).to eq ??? }
+    end
+```
+
+上の `???` には何が入っていれば良いでしょうか。
+
+`let` はややこしいので `number` にいれてしまいましょう。
+
+```ruby
+    context 'number が 0 の時' do
+      it { expect(add_10(59)).to eq ??? }
+    end
+```
+
+するとこうなりますね。
+
+`59 + 10` が何になっていればいいのか、という問題なので簡単です、 `69` になっていれば良さそうですね。
+
+それではこのテストの `-10` を `69` に編集して、もう一度テストを実行してみましょう。
+
+```
+bundle exec rspec spec/tutorials/simple_spec.rb
+```
+
+とやると...
+
+```
+..F
+
+Failures:
+
+  1) Simple tests not related to Rails #add_10 number が負の数の時 should eq 15
+     Failure/Error: it { expect(add_10(number)).to eq 15 }
+
+       expected: 15
+            got: -90
+
+       (compared using ==)
+     # ./spec/tutorials/simple_spec.rb:28:in `block (4 levels) in <top (required)>'
+
+Finished in 0.0301 seconds (files took 0.13549 seconds to load)
+3 examples, 1 failure
+
+Failed examples:
+
+rspec ./spec/tutorials/simple_spec.rb:28 # Simple tests not related to Rails #add_10 number が負の数の時 should eq 15
+```
+
+おめでとうございます！さっきまで 2 つのテストが失敗していましたが、 1 つになりました！
+
+#### 最後のテストを修正する
+
+ここまでやってきたことを活かして最後のテストも修正してみてください。
+
+そして
+
+```
+bundle exec rspec spec/tutorials/simple_spec.rb
+```
+
+とやると、結果が
+
+```
+...
+
+Finished in 0.00671 seconds (files took 0.1356 seconds to load)
+3 examples, 0 failures
+```
+
+と非常にすっきりしたものになることも確認してみてください。
+
 ### モデルのテストを書いてみよう
+
+それではここから Rails アプリケーションっぽいテストを書いてみましょう。
+
+今回の Rails アプリケーションでは `app/models` 配下に `Hoge` というモデルがありますね。
+
+これを開いてみましょう。
 
 ### リクエストのテストを書いてみよう
 
-
+Xxx
