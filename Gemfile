@@ -17,7 +17,6 @@ end
 
 group :test do
   gem 'rspec-rails'
-  gem 'factory_bot_rails'
   gem 'database_rewinder' # テストデータ削除
   gem 'capybara', '>= 2.15'
   gem 'selenium-webdriver'
