@@ -58,11 +58,11 @@ end
 でもこの number がもし仮に `"ドラえも〜ん"` といった文字列を取りうるとしたら...？
 
 ```
-irb(main):004:0> add_10("ドラえも〜ん")
+irb(main):001:0> add_10("ドラえも〜ん")
 Traceback (most recent call last):
-        6: from /Users/yusuke/.rbenv/versions/2.6.2/bin/irb:23:in `<main>'
-        5: from /Users/yusuke/.rbenv/versions/2.6.2/bin/irb:23:in `load'
-        4: from /Users/yusuke/.rbenv/versions/2.6.2/lib/ruby/gems/2.6.0/gems/irb-1.0.0/exe/irb:11:in `<top (required)>'
+        6: from /UnknownUser/.rbenv/versions/2.6.2/bin/irb:23:in `<main>'
+        5: from /UnknownUser/.rbenv/versions/2.6.2/bin/irb:23:in `load'
+        4: from /UnknownUser/.rbenv/versions/2.6.2/lib/ruby/gems/2.6.0/gems/irb-1.0.0/exe/irb:11:in `<top (required)>'
         3: from (irb):4
         2: from (irb):2:in `add_10'
         1: from (irb):2:in `+'
