@@ -363,7 +363,62 @@ Finished in 0.00671 seconds (files took 0.1356 seconds to load)
 
 今回の Rails アプリケーションでは `app/models` 配下に `Book` というモデルがありますね。
 
-これを開いてみましょう。
+まずこれを開いてみましょう。 (`app/models/book.rb`)
+
+```ruby
+# frozen_string_literal: true
+
+class Book < ApplicationRecord
+  belongs_to :author
+
+  def info
+    return unless title
+
+    if page
+      "#{title}: #{page} pages by #{author.name}"
+    else
+      "#{title} by #{author.name}"
+    end
+  end
+end
+```
+
+こんな定義になっていると思います。
+
+この `info` というメソッドのテストを書いてみましょう。
+
+テストの場所は `spec/models/books_spec.rb` です。これを開いてみましょう。
+
+今回も僕が途中まで書いておきました。
+
+```ruby
+# frozen_string_literal: true
+
+require 'spec_helper'
+
+RSpec.describe Book, type: :model do
+  describe '#info' do
+    context 'page が nil の場合' do
+      let(:author) { Author.create!(name: 'Haruki Murakami') }
+      let(:book) { Book.create!(:book, author: author, title: '', page: nil) }
+
+      it { expect(book.info).to eq '' }
+    end
+
+    context 'page が 150 の場合' do
+      # ここを埋めてみよう
+    end
+
+    context 'title が nil の場合' do
+      # ここを埋めてみよう
+    end
+  end
+end
+```
+
+`context` に書かれている条件通りの状態を作った上で、正しい値が何かを考えてテストしてみましょう。
+
+余力があれば `spec/models/authors_spec.rb` に `Author` モデルに定義されている `greet` メソッドにもテストを書いてみましょう。
 
 ### リクエストのテストを書いてみよう
 
